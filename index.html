@@ -1,174 +1,130 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animasyonlu Düğün Davetiyesi</title>
-    <style>
-        /* Genel sayfa ayarları (Düğün konseptine uygun soft renkler) */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #fdfaf6;
-            font-family: 'Georgia', serif;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8">
+  <title>Zarf Animasyonu</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #1e1e1e;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
 
-        /* Ana Taşıyıcı */
-        .container {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .scene {
+      perspective: 1000px;
+    }
 
-        /* Zarfın ve kartın içinde bulunduğu alan */
-        .envelope-wrapper {
-            position: relative;
-            width: 320px;
-            height: 200px;
-            cursor: pointer;
-            transition: transform 0.8s ease-in-out;
-        }
+    .envelope {
+      width: 250px;
+      height: 150px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
+      cursor: pointer;
+    }
 
-        /* Zarfın Arka Yüzü */
-        .envelope-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: #d4a373; /* Zarf rengi */
-            border-radius: 5px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
+    .face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+    }
 
-        /* Zarfın Ön Yüzü (CSS Clip-path ile zarf katlama şekli verildi) */
-        .envelope-front {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: #e6b981;
-            border-radius: 5px;
-            clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
-            z-index: 3;
-        }
+    .back {
+      background: url(Ön.png) center/cover no-repeat;
+    }
 
-        /* Zarfın Kapağı (Açılıp kapanan kısım) */
-        .envelope-flap {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 65%;
-            background-color: #f0c996;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-            z-index: 4;
-            transform-origin: top; /* Dönme noktası üst kenar */
-            transition: transform 0.6s ease-in-out;
-        }
+    .front {
+      background: url(Arka.png) center/cover no-repeat;
+      transform: rotateY(180deg);
+    }
 
-        /* İçinden Çıkan Kart */
-        .card {
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            width: 290px;
-            height: 180px;
-            background-color: #ffffff;
-            border-radius: 5px;
-            z-index: 2; /* Kapalıyken zarfın ön yüzünün arkasında */
-            transition: all 0.8s ease-in-out;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-            border: 2px solid #f2e8cf;
-        }
+    .flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: url(duvar\ kağıdı.png) center/cover no-repeat;
+      transform-origin: top;
+      transition: transform 0.6s;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+    }
 
-        .card h2 {
-            margin: 0 0 10px 0;
-            color: #d4a373;
-            font-size: 22px;
-        }
+    .open .flap {
+      transform: rotateX(180deg);
+    }
 
-        .card p {
-            margin: 0;
-            color: #555;
-            font-size: 14px;
-            line-height: 1.5;
-        }
+    .flip {
+      transform: rotateY(180deg);
+    }
 
-        /* --- 1. TIKLAMA: ZARF AÇILIR, KART BİRAZ GÖRÜNÜR --- */
-        .envelope-wrapper.step-1 .envelope-flap {
-            transform: rotateX(180deg); /* Kapak yukarı açılır */
-        }
-        .envelope-wrapper.step-1 .card {
-            transform: translateY(-40px); /* Kart biraz yukarı çıkar */
-        }
+    /* FOTOĞRAF */
+    #foto {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 200px;
+      border-radius: 10px;
+      opacity: 0;
+      transition: transform 0.6s ease, opacity 0.4s;
+      z-index: 10;
+    }
 
-        /* --- 2. TIKLAMA: KART ÇIKAR, ZARF KAPANIR VE YAN YANA GELİRLER --- */
-        .envelope-wrapper.step-2 {
-            transform: translateX(-180px); /* Zarfı sola kaydırır */
-        }
-        .envelope-wrapper.step-2 .envelope-flap {
-            transform: rotateX(0deg); /* Kapak tekrar kapanır */
-            transition-delay: 0.3s; /* Kart çıkarken hemen kapanmaması için gecikme */
-        }
-        .envelope-wrapper.step-2 .card {
-            /* Kartı sağa ve dışarı alır, boyutunu biraz büyütür */
-            transform: translate(360px, -10px) scale(1.1); 
-            z-index: 5; /* Kartı zarfın üstüne çıkarır */
-            box-shadow: 0 15px 25px rgba(0,0,0,0.15);
-        }
-    </style>
+    /* BÜYÜME ANİMASYONU */
+    .show-photo #foto {
+      
+      opacity: 1;
+      transform: rotateY(180deg);
+      
+    }
+
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="envelope-wrapper" id="invitationWrapper">
-            <div class="envelope-back"></div>
-            
-            <div class="card">
-                <img src="MERVE TONBUL.png" alt="Kapağı">
-                <h2>Ayşe & Ali</h2>
-                <p>En mutlu günümüzde sizleri de aramızda görmekten onur duyarız.</p>
-                <p><strong>24 Ağustos 2026</strong></p>
-            </div>
-            
-            <div class="envelope-front"></div>
-            <div class="envelope-flap"></div>
-        </div>
+<div class="scene">
+  <div class="envelope" id="envelope">
+
+    <!-- FOTOĞRAF -->
+    <img id="foto" src="Ton Motors.png">
+
+    <div class="face back"></div>
+    <div class="face front">
+      <div class="flap"></div>
+      
     </div>
+  </div>
+</div>
 
-    <script>
-        // Tıklama sayacını tutuyoruz
-        let clickCount = 0;
-        const wrapper = document.getElementById('invitationWrapper');
+<script>
+  const envelope = document.getElementById("envelope");
+  let state = 0;
 
-        wrapper.addEventListener('click', () => {
-            clickCount++;
+  envelope.addEventListener("click", () => {
+    state++;
 
-            if (clickCount === 1) {
-                // 1. Tıklama: Zarfı aç
-                wrapper.classList.add('step-1');
-            } 
-            else if (clickCount === 2) {
-                // 2. Tıklama: Kartı çıkar, zarfı kapat ve yan yana diz
-                wrapper.classList.remove('step-1');
-                wrapper.classList.add('step-2');
-            } 
-            else {
-                // 3. Tıklama (Ekstra): Her şeyi başa sarmak istersen
-                wrapper.classList.remove('step-2');
-                clickCount = 0;
-            }
-        });
-    </script>
+    if (state === 1) {
+      envelope.classList.add("flip");
+
+    } else if (state === 2) {
+      envelope.classList.add("open");
+
+    } else if (state === 3) {
+      envelope.classList.add("show-photo"); // FOTOĞRAF ÇIKAR
+
+    } else {
+      state = 0;
+      envelope.classList.remove("flip", "open", "show-photo");
+    }
+  });
+</script>
 
 </body>
 </html>
