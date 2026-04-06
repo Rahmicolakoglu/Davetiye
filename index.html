@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Zarf Animasyonu</title>
+  <title>Merve Tonbula Davetiye</title>
   <style>
     body {
       display: flex;
@@ -12,6 +12,8 @@
       background: #1e1e1e;
       margin: 0;
       font-family: Arial, sans-serif;
+    
+      
     }
 
     .scene {
@@ -19,12 +21,13 @@
     }
 
     .envelope {
-      width: 250px;
-      height: 150px;
+      width: 700px;
+      height: 450px;
       position: relative;
       transform-style: preserve-3d;
       transition: transform 0.8s;
       cursor: pointer;
+      
     }
 
     .face {
@@ -37,11 +40,15 @@
 
     .back {
       background: url(Ön.png) center/cover no-repeat;
+      background-size: 100% 100%;
+      
     }
+
 
     .front {
       background: url(Arka.png) center/cover no-repeat;
       transform: rotateY(180deg);
+      background-size: 100% 100%;
     }
 
     .flap {
